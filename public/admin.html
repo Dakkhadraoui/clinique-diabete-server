@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Admin - Clinique Diabète</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f4f7fb;
+    padding: 30px;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    color: #1a8e5f;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  }
+
+  .status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  .badge.online {
+    background: #d4f7dc;
+    color: #1a8e5f;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .info-row:last-child { border-bottom: none; }
+
+  .users-list {
+    list-style: none;
+  }
+
+  .users-list li {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: #f9fafc;
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #1a8e5f;
+    margin-right: 12px;
+  }
+
+  .role-tag {
+    margin-left: auto;
+    background: #e0e7ff;
+    color: #4338ca;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .btn-danger {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  .btn-danger:hover { background: #fecaca; }
+
+  .empty {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>🖥️ Admin - Clinique Diabète</h1>
+
+  <div class="card">
+    <div class="status">
+      <h2>Status du serveur</h2>
+      <span class="badge online" id="statusBadge">🟢 En ligne</span>
+    </div>
+
+    <div class="info-row">
+      <span>Port</span>
+      <strong id="port">-</strong>
+    </div>
+
+    <div class="info-row">
+      <span>Démarré depuis</span>
+      <strong id="uptime">-</strong>
+    </div>
+
+    <div class="info-row">
+      <span>Appareils connectés</span>
+      <strong id="userCount">0</strong>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-bottom:15px;">👥 Utilisateurs connectés</h2>
+    <ul class="users-list" id="usersList">
+      <li class="empty">Chargement...</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <button class="btn btn-danger" onclick="stopServer()">
+      🔴 Arrêter le serveur
+    </button>
+  </div>
+
+</div>
+
+<script>
+
+async function loadStatus() {
+
+  try {
+    const res = await fetch("/admin/status");
+    const data = await res.json();
+
+    document.getElementById("port").innerText = data.port;
+    document.getElementById("uptime").innerText = data.uptime;
+    document.getElementById("userCount").innerText = data.users.length;
+
+    const list = document.getElementById("usersList");
+
+    if (data.users.length === 0) {
+      list.innerHTML = '<li class="empty">Aucun utilisateur connecté</li>';
+    } else {
+      list.innerHTML = data.users.map(u => `
+        <li>
+          <span class="dot"></span>
+          ${u}
+        </li>
+      `).join("");
+    }
+
+  } catch (e) {
+    console.log("Erreur:", e);
+  }
+}
+
+async function stopServer() {
+
+  if (!confirm("Voulez-vous vraiment arrêter le serveur ?")) return;
+
+  await fetch("/admin/stop", { method: "POST" });
+
+  document.getElementById("statusBadge").innerText = "🔴 Arrêté";
+  document.getElementById("statusBadge").style.background = "#fee2e2";
+  document.getElementById("statusBadge").style.color = "#dc2626";
+
+  alert("Serveur arrêté !");
+}
+
+loadStatus();
+setInterval(loadStatus, 3000);
+
+</script>
+
+</body>
+</html>
