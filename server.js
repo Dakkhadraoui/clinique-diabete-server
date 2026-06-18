@@ -321,6 +321,10 @@ app.post("/login", (req, res) => {
     "SELECT * FROM users WHERE email=?",
     [email],
     async (err, result) => {
+       if (err) {
+      console.log("❌ ERREUR SQL:", err);
+      return res.json({ success: false });
+    }
 
       console.log("👤 USER TROUVÉ:", result);
 
