@@ -25,18 +25,40 @@ const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
 const db = require("./db");
-////pour email
- const nodemailer = require("nodemailer");
+///////////////////////pour email
+ //const nodemailer = require("nodemailer");
+
+//const transporter = nodemailer.createTransport({
+  //service: "gmail",
+  //auth: {
+    //user: process.env.GMAIL_USER,
+    //pass: process.env.GMAIL_PASS
+  //}
+//});
+
+/////
+//nouveau transporter  
+const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_PASS
   }
 });
 
-/////
+// test SMTP
+transporter.verify((err) => {
+  if (err) {
+    console.log("❌ SMTP ERROR:", err);
+  } else {
+    console.log("✅ SMTP READY");
+  }
+});
+/////fin nouveau trans
 function sendAcceptanceEmail(email, name, password) {
 
   const mailOptions = {
