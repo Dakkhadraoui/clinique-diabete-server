@@ -14,7 +14,21 @@ const db = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0,
+  connectTimeout: 60000,
 });
+
+// Ping toutes les 30 secondes pour garder la connexion active
+setInterval(() => {
+  db.query('SELECT 1', (err) => {
+    if (err) {
+      console.log("⚠️ Ping DB failed:", err.message);
+    } else {
+      console.log("✅ DB ping OK");
+    }
+  });
+}, 30000);
 
 db.getConnection((err, connection) => {
   if (err) {
@@ -24,5 +38,6 @@ db.getConnection((err, connection) => {
     connection.release();
   }
 });
+
 
 module.exports = db;
