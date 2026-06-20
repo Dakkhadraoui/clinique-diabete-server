@@ -1,9 +1,9 @@
-require("dotenv").config();
+ require("dotenv").config();
 
 const mysql = require('mysql2');
 
-console.log("🔗 DB HOST:", process.env.MYSQLHOST || process.env.DB_HOST);
-console.log("🔗 DB PORT:", process.env.MYSQLPORT || process.env.DB_PORT);
+console.log("DB HOST:", process.env.MYSQLHOST || process.env.DB_HOST);
+console.log("DB PORT:", process.env.MYSQLPORT || process.env.DB_PORT);
 
 const db = mysql.createPool({
   host: process.env.MYSQLHOST || process.env.DB_HOST,
@@ -19,25 +19,23 @@ const db = mysql.createPool({
   connectTimeout: 60000,
 });
 
-// Ping toutes les 30 secondes pour garder la connexion active
 setInterval(() => {
   db.query('SELECT 1', (err) => {
     if (err) {
-      console.log("⚠️ Ping DB failed:", err.message);
+      console.log("Ping DB failed:", err.message);
     } else {
-      console.log("✅ DB ping OK");
+      console.log("DB ping OK");
     }
   });
 }, 30000);
 
 db.getConnection((err, connection) => {
   if (err) {
-    console.log("❌ erreur connexion DB:", err);
+    console.log("erreur connexion DB:", err);
   } else {
-    console.log("✅ connecté à MySQL Railway (pool)");
+    console.log("connecte a MySQL Railway");
     connection.release();
   }
 });
-
 
 module.exports = db;
